@@ -1,0 +1,58 @@
+rules_version = '2';
+
+// ============================================================
+// REGRAS DE SEGURANÇA — cada pessoa só lê/escreve os PRÓPRIOS dados.
+// Sem isso, qualquer um com o link e uma conta poderia ler os dados de outra pessoa
+// (a suposição de segurança nunca deve depender só do app, e sim destas regras no servidor).
+// ============================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function autenticado() {
+      return request.auth != null;
+    }
+
+    function donoDoDocumento() {
+      return autenticado() && request.auth.uid == resource.data.userId;
+    }
+
+    function donoDoDadoEnviado() {
+      return autenticado() && request.auth.uid == request.resource.data.userId;
+    }
+
+    // usuarios/{uid} -> o ID do documento É o próprio uid
+    match /usuarios/{uid} {
+      allow read: if autenticado() && request.auth.uid == uid;
+      allow write: if autenticado() && request.auth.uid == uid;
+    }
+
+    match /contas/{docId} {
+      allow read, update, delete: if donoDoDocumento();
+      allow create: if donoDoDadoEnviado();
+    }
+
+    match /categorias/{docId} {
+      allow read, update, delete: if donoDoDocumento();
+      allow create: if donoDoDadoEnviado();
+    }
+
+    match /transacoes/{docId} {
+      allow read, update, delete: if donoDoDocumento();
+      allow create: if donoDoDadoEnviado();
+    }
+
+    match /investimentos/{docId} {
+      allow read, update, delete: if donoDoDocumento();
+      allow create: if donoDoDadoEnviado();
+    }
+
+    // dashboard_mensal e dashboard_anual usam ID = "{uid}_ANO" ou "{uid}_ANO_MES",
+    // então validamos comparando o próprio ID do documento com o uid autenticado.
+    match /dashboard_mensal/{docId} {
+      allow read, write: if autenticado() && docId.matches(request.auth.uid + '_.*');
+    }
+    match /dashboard_anual/{docId} {
+      allow read, write: if autenticado() && docId.matches(request.auth.uid + '_.*');
+    }
+  }
+}
