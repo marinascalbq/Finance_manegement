@@ -46,29 +46,13 @@ service cloud.firestore {
       allow create: if donoDoDadoEnviado();
     }
 
-    match /regras_categorizacao/{docId} {
-      allow read, update, delete: if donoDoDocumento();
-      allow create: if donoDoDadoEnviado();
-    }
-
-    match /importacoes/{docId} {
-      allow read, update, delete: if donoDoDocumento();
-      allow create: if donoDoDadoEnviado();
-    }
-
-    // dashboard_mensal e dashboard_anual: validados pelo campo userId DENTRO do documento,
-    // não pelo formato do ID. Isso corrige o erro "Missing or insufficient permissions" que
-    // acontecia quando o ID do documento não batia com o padrão esperado pela regra antiga.
+    // dashboard_mensal e dashboard_anual usam ID = "{uid}_ANO" ou "{uid}_ANO_MES",
+    // então validamos comparando o próprio ID do documento com o uid autenticado.
     match /dashboard_mensal/{docId} {
-      allow read: if autenticado() && resource.data.userId == request.auth.uid;
-      allow create: if donoDoDadoEnviado();
-      allow update, delete: if donoDoDocumento();
+      allow read, write: if autenticado() && docId.matches(request.auth.uid + '_.*');
     }
-
     match /dashboard_anual/{docId} {
-      allow read: if autenticado() && resource.data.userId == request.auth.uid;
-      allow create: if donoDoDadoEnviado();
-      allow update, delete: if donoDoDocumento();
+      allow read, write: if autenticado() && docId.matches(request.auth.uid + '_.*');
     }
   }
 }

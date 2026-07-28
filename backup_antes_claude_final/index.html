@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -171,29 +172,11 @@
       <section id="tela-historico" style="display:none;">
         <div class="painel panel">
           <h2>Movimentações</h2>
-          <p class="panel-subtitle">Filtre por período, conta, categoria ou tipo. Clique em "editar" para corrigir uma classificação.</p>
-          <div class="filter-bar" style="margin-bottom:16px;">
-            <div class="campo"><label>Data Inicial</label><input type="date" id="h_data_ini"></div>
-            <div class="campo"><label>Data Final</label><input type="date" id="h_data_fim"></div>
-            <div class="campo"><label>Conta</label><select id="h_conta"><option value="">Todas</option></select></div>
-            <div class="campo"><label>Categoria</label><select id="h_categoria"><option value="">Todas</option></select></div>
-            <div class="campo"><label>Tipo</label>
-              <select id="h_tipo">
-                <option value="">Todos</option>
-                <option value="Receita">Receita</option>
-                <option value="Despesa">Despesa</option>
-                <option value="Transferência">Transferência</option>
-              </select>
-            </div>
-            <button class="btn-periodo" id="btn-buscar-historico">Buscar</button>
-            <button class="btn-periodo btn-limpar" id="btn-limpar-historico">Limpar filtros</button>
-          </div>
-          <div id="historico-info" class="drill-hint"></div>
+          <p class="panel-subtitle">Acompanhe os registros recentes. Em breve, use filtros por período, conta e categoria.</p>
           <table>
             <thead><tr><th>Data</th><th>Conta</th><th>Descrição</th><th>Categoria</th><th class="num">Valor</th><th></th></tr></thead>
             <tbody id="tabela-historico"></tbody>
           </table>
-          <button class="btn btn-secundario" id="btn-carregar-mais" style="margin-top:14px; display:none;">Carregar mais</button>
         </div>
       </section>
 
@@ -264,11 +247,6 @@
       <!-- ---------- ORGANIZACAO ---------- -->
       <section id="tela-config" style="display:none;">
         <div class="painel panel">
-          <h2>Manutenção da base</h2>
-          <p class="panel-subtitle">Se os saldos ou categorias parecerem inconsistentes (ex: depois de uma importação), reconstrua a base.</p>
-          <button class="btn" id="btn-abrir-rebuild">Reconstruir base</button>
-        </div>
-        <div class="painel panel">
           <h2>Organização das contas</h2>
           <table><thead><tr><th>Nome</th><th>Tipo</th><th>Instituição</th></tr></thead><tbody id="tabela-contas"></tbody></table>
           <h3 style="margin-top:18px;">Nova conta</h3>
@@ -295,42 +273,6 @@
         </div>
       </section>
     </main>
-  </div>
-
-  <!-- ===================== MODAL: editar lançamento ===================== -->
-  <div id="modal-editar" class="modal-overlay" style="display:none;">
-    <div class="modal-card">
-      <h2>Editar lançamento</h2>
-      <p class="panel-subtitle" id="modal-editar-desc"></p>
-      <form id="formEditar">
-        <div class="campo"><label>Conta</label><select id="e_conta"></select></div>
-        <div class="campo"><label>Categoria</label><select id="e_categoria"></select></div>
-        <div class="campo"><label>Tipo de Movimento</label>
-          <select id="e_tipo">
-            <option value="Receita">Receita</option>
-            <option value="Despesa">Despesa</option>
-            <option value="Transferência">Transferência</option>
-          </select>
-        </div>
-        <div class="campo"><label>Observação</label><input type="text" id="e_obs"></div>
-        <div class="campo check"><input type="checkbox" id="e_aplicar_similares"><label style="margin:0;">Aplicar esta categoria a descrições semelhantes (cria uma regra)</label></div>
-        <div class="campo" id="e_termo_wrap" style="display:none;"><label>Termo da regra (trecho da descrição)</label><input type="text" id="e_termo"></div>
-        <button class="btn" type="submit">Salvar alterações</button>
-        <button class="btn btn-secundario" type="button" id="btn-fechar-modal-editar">Cancelar</button>
-      </form>
-      <div id="modal-editar-msg" class="msg"></div>
-    </div>
-  </div>
-
-  <!-- ===================== MODAL: reconstruir base (resumo) ===================== -->
-  <div id="modal-rebuild" class="modal-overlay" style="display:none;">
-    <div class="modal-card">
-      <h2>Reconstruir base</h2>
-      <p class="panel-subtitle">Recalcula contas, categorias, saldos e dashboards a partir de todas as suas transações. Use após importações ou se algo parecer inconsistente.</p>
-      <div id="rebuild-status" class="msg"></div>
-      <button class="btn" id="btn-confirmar-rebuild">Iniciar reconstrução</button>
-      <button class="btn btn-secundario" id="btn-fechar-modal-rebuild">Fechar</button>
-    </div>
   </div>
 
   <!-- Firebase (SDK modular v10, via CDN ESM) -->
