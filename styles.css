@@ -121,3 +121,88 @@ td{ padding:9px 6px; border-bottom:1px solid var(--borda);}
 .msg-erro{ background:#FBEAE3; color:#9B4A2F; padding:10px 14px; border-radius:10px; }
 canvas{ max-height:280px; }
 .loading{ text-align:center; padding:40px; color:var(--texto-suave); }
+
+/* ---------- Ajustes Home/Login: imagem editorial, privacidade e equilíbrio ---------- */
+.auth-shell{
+  max-width:1120px;
+  gap:44px;
+}
+.auth-title{
+  font-size:29px;
+  line-height:1.18;
+  max-width:560px;
+}
+.auth-subtitle{
+  max-width:610px;
+}
+.auth-visual{
+  margin:20px 0 18px;
+  width:100%;
+  max-width:610px;
+  border-radius:20px;
+  overflow:hidden;
+  border:1px solid var(--borda);
+  box-shadow:0 14px 40px rgba(110,44,59,.10);
+  background:#fff;
+}
+.auth-visual img{
+  display:block;
+  width:100%;
+  height:230px;
+  object-fit:cover;
+  object-position:center;
+}
+.auth-panel .campo:last-of-type{
+  margin-bottom:22px;
+}
+.auth-actions{
+  margin-top:4px;
+  gap:2px;
+}
+.auth-privacy-note{
+  margin-top:18px;
+  padding:14px 16px;
+  background:#fff;
+  border:1px solid var(--borda);
+  border-radius:14px;
+  font-size:12.5px;
+  line-height:1.6;
+  color:var(--texto-suave);
+  box-shadow:0 4px 14px rgba(110,44,59,.04);
+}
+.auth-privacy-note strong{
+  color:var(--vinho);
+}
+@media (min-width:861px){
+  .auth-hero{
+    padding-top:0;
+  }
+  .auth-panel.login-card{
+    align-self:center;
+  }
+}
+@media (max-width:860px){
+  .auth-title{
+    font-size:28px;
+  }
+  .auth-visual{
+    max-width:100%;
+  }
+  .auth-visual img{
+    height:210px;
+  }
+  .auth-privacy-note{
+    margin-top:16px;
+  }
+}
+@media (max-width:520px){
+  .auth-title{
+    font-size:25px;
+  }
+  .auth-visual img{
+    height:180px;
+  }
+  .auth-proof-grid{
+    grid-template-columns:1fr;
+  }
+}

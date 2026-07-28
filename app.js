@@ -930,6 +930,7 @@ document.getElementById('btn-limpar-historico').addEventListener('click', () => 
   document.getElementById('h_conta').value = '';
   document.getElementById('h_categoria').value = '';
   document.getElementById('h_tipo').value = '';
+  document.getElementById('h_descricao').value = '';
   buscarHistorico(true);
 });
 document.getElementById('btn-carregar-mais').addEventListener('click', () => buscarHistorico(false));
@@ -941,6 +942,7 @@ function abrirDetalhesTransacoes(filtros) {
   document.getElementById('h_conta').value = filtros.contaNome || '';
   document.getElementById('h_categoria').value = filtros.categoriaNome || '';
   document.getElementById('h_tipo').value = filtros.tipoMovimento || '';
+  document.getElementById('h_descricao').value = '';
   navegarPara('historico');
   buscarHistorico(true);
 }
@@ -961,6 +963,7 @@ async function buscarHistorico(reiniciar) {
     const contaNome = document.getElementById('h_conta').value;
     const categoriaNome = document.getElementById('h_categoria').value;
     const tipoMovimento = document.getElementById('h_tipo').value;
+    const termoDescricao = document.getElementById('h_descricao').value.trim().toLowerCase();
 
     const condicoes = [where('userId', '==', usuarioAtual.uid)];
     if (contaNome) condicoes.push(where('contaNome', '==', contaNome));
@@ -969,15 +972,27 @@ async function buscarHistorico(reiniciar) {
     if (dataIni) condicoes.push(where('data', '>=', Timestamp.fromDate(new Date(dataIni + 'T00:00:00'))));
     if (dataFim) condicoes.push(where('data', '<=', Timestamp.fromDate(new Date(dataFim + 'T23:59:59'))));
 
-    let qArgs = [collection(db, 'transacoes'), ...condicoes, orderBy('data', 'desc'), limit(50)];
-    if (!reiniciar && historicoUltimoDoc) qArgs.splice(qArgs.length - 1, 0, startAfter(historicoUltimoDoc));
+    // O Firestore não tem busca textual nativa ("contém"). Quando há termo de descrição,
+    // buscamos um lote maior (até 300, sem paginação por cursor) e filtramos no navegador.
+    // Isso cobre bem o uso comum; para bases muito grandes, combine com data/conta/categoria
+    // para restringir antes de digitar a descrição.
+    const buscaTextoAtiva = termoDescricao.length > 0;
+    const tamanhoLote = buscaTextoAtiva ? 300 : 50;
+
+    let qArgs = [collection(db, 'transacoes'), ...condicoes, orderBy('data', 'desc'), limit(tamanhoLote)];
+    if (!buscaTextoAtiva && !reiniciar && historicoUltimoDoc) qArgs.splice(qArgs.length - 1, 0, startAfter(historicoUltimoDoc));
     const q = query(...qArgs);
     const snap = await getDocs(q);
 
-    historicoUltimoDoc = snap.docs.length ? snap.docs[snap.docs.length - 1] : historicoUltimoDoc;
-    btnMais.style.display = snap.docs.length === 50 ? 'block' : 'none';
+    let docsFiltrados = snap.docs;
+    if (buscaTextoAtiva) {
+      docsFiltrados = snap.docs.filter(d => (d.data().descricao || '').toLowerCase().includes(termoDescricao));
+    }
 
-    const linhasHtml = snap.docs.map(d => {
+    historicoUltimoDoc = (!buscaTextoAtiva && snap.docs.length) ? snap.docs[snap.docs.length - 1] : historicoUltimoDoc;
+    btnMais.style.display = (!buscaTextoAtiva && snap.docs.length === 50) ? 'block' : 'none';
+
+    const linhasHtml = docsFiltrados.map(d => {
       const t = d.data();
       const dataFmt = t.data.toDate().toLocaleDateString('pt-BR');
       return `<tr>
@@ -987,10 +1002,16 @@ async function buscarHistorico(reiniciar) {
       </tr>`;
     }).join('');
 
-    if (reiniciar) document.getElementById('tabela-historico').innerHTML = linhasHtml;
+    if (reiniciar || buscaTextoAtiva) document.getElementById('tabela-historico').innerHTML = linhasHtml;
     else document.getElementById('tabela-historico').insertAdjacentHTML('beforeend', linhasHtml);
 
-    info.textContent = snap.empty && reiniciar ? 'Nenhum lançamento encontrado para esses filtros.' : '';
+    if (docsFiltrados.length === 0) {
+      info.textContent = 'Nenhum lançamento encontrado para esses filtros.';
+    } else if (buscaTextoAtiva) {
+      info.textContent = `${docsFiltrados.length} resultado(s) contendo "${termoDescricao}" (busca entre os ${snap.docs.length} lançamentos mais recentes que batem com os outros filtros).`;
+    } else {
+      info.textContent = '';
+    }
 
     document.querySelectorAll('.btn-excluir').forEach(btn => {
       btn.onclick = async () => {
